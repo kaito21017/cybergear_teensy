@@ -1,7 +1,7 @@
 #include "cybergear_driver.h"
-#include <FlexCAN_T4.h>
+// #include <FlexCAN_T4.h>
 // #include "HardwareSerial.h"
-#include "cybergear_defs.h"
+// #include "cybergear_defs.h"
 
 /* PUBLIC */
 CyberGearDriver::CyberGearDriver() {};
@@ -140,7 +140,23 @@ void CyberGearDriver::process_message(CAN_message_t& message){
     _status.torque = _uint_to_float(raw_torque, T_MIN, T_MAX);
     _status.temperature = raw_temperature;
 }
-CyberGearStatus CyberGearDriver::get_status() const {
+CyberGearStatus CyberGearDriver::get_status() {
+    CAN_message_t r_message;
+    if(can1.read(r_message)){
+        if (((r_message.id & 0xFF00) >> 8) == _cybergear_can_id){
+            uint16_t raw_position = r_message.buf[1] | r_message.buf[0] << 8;
+            uint16_t raw_speed = r_message.buf[3] | r_message.buf[2] << 8;
+            uint16_t raw_torque = r_message.buf[5] | r_message.buf[4] << 8;
+            uint16_t raw_temperature = r_message.buf[7] | r_message.buf[6] << 8;
+
+            _status.position = _uint_to_float(raw_position, P_MIN, P_MAX);
+            _status.speed = _uint_to_float(raw_speed, V_MIN, V_MAX);
+            _status.torque = _uint_to_float(raw_torque, T_MIN, T_MAX);
+            _status.temperature = raw_temperature/10;
+        }
+    }
+
+
     return _status;
 }
 
@@ -178,9 +194,8 @@ void CyberGearDriver::_send_can_package(uint8_t can_id, uint8_t cmd_id, uint16_t
     //     if (_use_serial_debug) Serial.println("Failed to queue message for transmission\n");
     // }
     can1.write(message);
-
-
 }
+
 void CyberGearDriver::_send_can_float_package(uint8_t can_id, uint16_t addr, float value, float min, float max){
     uint8_t data[8] = {0x00};
     data[0] = addr & 0x00FF;

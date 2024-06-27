@@ -1,5 +1,5 @@
-#ifndef CYBER_GEAR_DEFS_H
-#define CYBER_GEAR_DEFS_H
+#ifndef CYBERGEAR_DEFS_H
+#define CYBERGEAR_DEFS_H
 
 #define CMD_POSITION 1
 #define CMD_RESPONSE 2

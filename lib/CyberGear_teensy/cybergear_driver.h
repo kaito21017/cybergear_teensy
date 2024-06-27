@@ -1,5 +1,9 @@
-// #include "driver/twai.h"
+#ifndef CYBERGEAR_DRIVER_H
+#define CYBERGEAR_DRIVER_H
+
+#include <Arduino.h>  // for micros and delay function
 #include "cybergear_defs.h"
+#include <FlexCAN_T4.h>
 
 struct CyberGearStatus {
     float position;
@@ -60,7 +64,7 @@ class CyberGearDriver {
 
         void request_status();
         void process_message(CAN_message_t& message);
-        CyberGearStatus get_status() const;
+        CyberGearStatus get_status();
         FlexCAN_T4<CAN1, RX_SIZE_256, TX_SIZE_16> can1;
         
     private:
@@ -76,3 +80,5 @@ class CyberGearDriver {
         CyberGearStatus _status;
         
 };
+
+#endif
