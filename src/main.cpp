@@ -1,69 +1,82 @@
 #include <Arduino.h>
 #include <FlexCAN_T4.h>
+#include <cybergear_driver.h>
 
+// FlexCAN_T4<CAN3, RX_SIZE_256, TX_SIZE_16> can3;
+uint8_t CYBERGEAR_CAN_ID = 0x7E;
+uint8_t MASTER_CAN_ID = 0x00;
+CyberGearDriver cybergear = CyberGearDriver(CYBERGEAR_CAN_ID, MASTER_CAN_ID);
 
-#define P_MIN -12.5f  
-#define P_MAX 12.5f  
-#define V_MIN -30.0f  
-#define V_MAX 30.0f  
-#define KP_MIN 0.0f  
-#define KP_MAX 500.0f  
-#define KD_MIN 0.0f  
-#define KD_MAX 5.0f  
-#define T_MIN -12.0f  
-#define T_MAX 12.0f  
-
-// struct exCanIdInfo{  
-// uint32_t id:8;  
-// uint32_t data:16;  
-// W/R 
-// uint32_t mode:5;  
-// uint32_t res:3;  
-// };  
-// CAN_message_t msg;
-
-// can_receive_message_struct rxMsg;  
-// can_trasnmit_message_struct txMsg={  
-//   .tx_sfid = 0,  
-//   .tx_efid = 0xff,  
-//   .tx_ft = CAN_FT_DATA,  
-//   .tx_ff = CAN_FF_EXTENDED,  
-//   .tx_dlen = 8,  
-// };  
-// #define txCanIdEx (((struct exCanIdInfo)&(txMsg.tx_efid)))  
-// #define rxCanIdEx (((struct exCanIdInfo)&(rxMsg.rx_efid))) //将扩展帧id 解析为自定义数据结构  
-// int float_to_uint(float x, float x_min, float x_max, int bits){  
-// float span = x_max - x_min;  
-// float offset = x_min;  
-// if(x > x_max) x=x_max;  
-// else if(x < x_min) x= x_min;  
-// return (int) ((x-offset)*((float)((1<<bits)-1))/span);  
-// }  
-// #define can_txd() can_message_transmit(CAN0, &txMsg)  
-// #define can_rxd() can_message_receive(CAN0, CAN_FIFO1, &rxMsg) 
-
-
-void enable_moter(uint64_t can_id){
-    
-}
-
-void set_run_mode(uint64_t run_mode){
-
-}
+CyberGearStatus motor_status;
 
 // put function declarations here:
 
-
+CAN_message_t msg;
 void setup() {
+  Serial.begin(115200); delay(400);
   // put your setup code here, to run once:
   // int result = myFunction(2, 3);
+  // can3.begin();
+  // can3.setBaudRate(1000000);
+  cybergear.init_can();
+  cybergear.init_motor(MODE_POSITION);
+  cybergear.set_limit_speed(10.0f); /* set the maximum speed of the motor */
+  cybergear.set_limit_current(5.0); /* current limit allows faster operation */
 }
 
 void loop() {
+  cybergear.request_status();
+   String str = Serial.readString();
+   static float pos = 0;
+
+   if(str == "c") {
+    cybergear.init_motor(MODE_POSITION);
+    cybergear.enable_motor();
+
+  }else if(str == "x") {
+    pos= 0;
+    cybergear.stop_motor();
+  } 
+  else if(str == "j") {
+    pos--;
+    cybergear.set_position(pos);
+  } else if(str == "l") {
+    pos++;
+    cybergear.set_position(pos);
+  } 
+
+  motor_status = cybergear.get_status();
+  // Serial.print(" Count: "); Serial.print(count);
+  Serial.print(" Angle: "); Serial.print(motor_status.position);
+  Serial.print(" Angular_vel: "); Serial.print(motor_status.speed);
+  Serial.print(" Torque: "); Serial.print(motor_status.torque);
+  Serial.print(" Tempareture: "); Serial.println(motor_status.temperature);
+
+
+
+
+
+  // if (((message.id & 0xFF00) >> 8) == CYBERGEAR_CAN_ID){
+  //   cybergear.process_message(message);
+  // }
+
+
+  //  if ( can3.read(msg) ) {
+  //   Serial.print("CAN3 "); 
+  //   Serial.print("MB: "); Serial.print(msg.mb);
+  //   Serial.print("  ID: 0x"); Serial.print(msg.id, DEC);
+  //   Serial.print("  EXT: "); Serial.print(msg.flags.extended );
+  //   Serial.print("  LEN: "); Serial.print(msg.len);
+  //   Serial.print(" DATA: ");
+  //   for ( uint8_t i = 0; i < 8; i++ ) {
+  //     Serial.print(msg.buf[i]); Serial.print(" ");
+  //   }
+  //   Serial.print("  TS: "); Serial.println(msg.timestamp);
+  //   // CybergearDriver.send_motion_control(msg)
+  // }
+
+
+
   // put your main code here, to run repeatedly:
 }
 
-// put function definitions here:
-int myFunction(int x, int y) {
-  return x + y;
-}
