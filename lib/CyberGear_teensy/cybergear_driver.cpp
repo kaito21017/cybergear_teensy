@@ -1,7 +1,7 @@
-#include "_cybergear_driver.h"
+#include "cybergear_driver.h"
 #include <FlexCAN_T4.h>
 // #include "HardwareSerial.h"
-
+#include "cybergear_defs.h"
 
 /* PUBLIC */
 CyberGearDriver::CyberGearDriver() {};
@@ -10,55 +10,15 @@ CyberGearDriver::CyberGearDriver(uint8_t cybergear_can_id, uint8_t master_can_id
     _master_can_id(master_can_id),
     _run_mode(MODE_MOTION),
     _use_serial_debug(false)
+    
 {}
 
 CyberGearDriver::~CyberGearDriver(){}
 
 int CyberGearDriver::init_can(){
-    FlexCAN_T4<CAN1, RX_SIZE_256, TX_SIZE_16> can1;
-     can1.begin();
+    // FlexCAN_T4<CAN1, RX_SIZE_256, TX_SIZE_16> can1;
+    can1.begin();
     can1.setBaudRate(1000000);
-    // _use_serial_debug = serial_debug;
-
-    // if (_use_serial_debug) {Serial.begin(115200); delay(500);}
-
-    // twai_status_info_t twai_status;
-    // twai_get_status_info(&twai_status);
-    // if (twai_status.state == TWAI_STATE_RUNNING) {
-    //     if (_use_serial_debug) Serial.println("Driver already installed. Skipping init()");
-    //     return 0;
-    // }
-
-    // // Initialize configuration structures using macro initializers
-    // twai_general_config_t g_config = TWAI_GENERAL_CONFIG_DEFAULT((gpio_num_t)tx_pin, (gpio_num_t)rx_pin, TWAI_MODE_NORMAL);
-    // twai_timing_config_t t_config = TWAI_TIMING_CONFIG_1MBITS();  //Look in the api-reference for other speed sets.
-    // twai_filter_config_t f_config = TWAI_FILTER_CONFIG_ACCEPT_ALL();
-
-    // // Install TWAI driver
-    // if (twai_driver_install(&g_config, &t_config, &f_config) == ESP_OK) {
-    //     if (_use_serial_debug) Serial.println("Driver installed");
-    // } else {
-    //     if (_use_serial_debug) Serial.println("Failed to install driver");
-    //     return -1;
-    // }
-
-    // //Start TWAI driver
-    // if (twai_start() == ESP_OK) {
-    //     if (_use_serial_debug) Serial.println("Driver started\n");
-    // } else {
-    //     if (_use_serial_debug) Serial.println("Failed to start driver\n");
-    //     return -1;
-    // }
-
-    // // Reconfigure alerts to detect TX alerts and Bus-Off errors
-    // uint32_t alerts_to_enable = TWAI_ALERT_RX_DATA | TWAI_ALERT_TX_IDLE | TWAI_ALERT_TX_SUCCESS | TWAI_ALERT_TX_FAILED | TWAI_ALERT_ERR_PASS | TWAI_ALERT_BUS_ERROR;
-    // if (twai_reconfigure_alerts(alerts_to_enable, NULL) == ESP_OK) {
-    //     if (_use_serial_debug) Serial.println("CAN Alerts reconfigured");
-    // } else {
-    //     if (_use_serial_debug) Serial.println("Failed to reconfigure alerts");
-    //     return -1;
-    // }
-
     return 0;
 }
 
@@ -87,7 +47,7 @@ void CyberGearDriver::set_limit_speed(float speed){
     _send_can_float_package(_cybergear_can_id, ADDR_LIMIT_SPEED, speed, 0.0f, V_MAX);
 }
 void CyberGearDriver::set_limit_current(float current){
-    _send_can_float_package(_cybergear_can_id, ADDR_LIMIT_CURRENT, current, 0.0f, I_MAX);
+    _send_can_float_package(_cybergear_can_id, ADDR_LIMIT_CURRENT, current, 0.0f, IQ_MAX);
 }
 void CyberGearDriver::set_limit_torque(float torque){
     _send_can_float_package(_cybergear_can_id, ADDR_LIMIT_TORQUE, torque, 0.0f, T_MAX);
@@ -97,7 +57,7 @@ void CyberGearDriver::set_limit_torque(float torque){
 void CyberGearDriver::send_motion_control(CyberGearMotionCommand cmd){
     uint8_t data[8] = {0x00};
 
-    uint16_t position = _float_to_uint(cmd.position, POS_MIN, POS_MAX, 16);
+    uint16_t position = _float_to_uint(cmd.position, P_MIN, P_MAX, 16);
     data[0] = position >> 8;
     data[1] = position & 0x00FF;
 
@@ -128,16 +88,16 @@ void CyberGearDriver::set_current_ki(float ki){
 void CyberGearDriver::set_current_filter_gain(float gain){
     _send_can_float_package(_cybergear_can_id, ADDR_CURRENT_FILTER_GAIN, gain, CURRENT_FILTER_GAIN_MIN, CURRENT_FILTER_GAIN_MAX);
 }
-void CyberGearDriver::set_current_ref(float current){
-    _send_can_float_package(_cybergear_can_id, ADDR_I_REF, current, I_MIN, I_MAX);
+void CyberGearDriver::set_current(float current){
+    _send_can_float_package(_cybergear_can_id, ADDR_IQ_REF, current, IQ_MIN, IQ_MAX);
 }
 
 // MODE_POSITION
 void CyberGearDriver::set_position_kp(float kp){
     _send_can_float_package(_cybergear_can_id, ADDR_POSITION_KP, kp, KP_MIN, KP_MAX);
 }
-void CyberGearDriver::set_position_ref(float position){
-    _send_can_float_package(_cybergear_can_id, ADDR_POSITION_REF, position, POS_MIN, POS_MAX);
+void CyberGearDriver::set_position(float position){
+    _send_can_float_package(_cybergear_can_id, ADDR_POSITION_REF, position, P_MIN, P_MAX);
 }
 
 // MODE_SPEED
@@ -147,7 +107,7 @@ void CyberGearDriver::set_speed_kp(float kp){
 void CyberGearDriver::set_speed_ki(float ki){
     _send_can_float_package(_cybergear_can_id, ADDR_SPEED_KI, ki, KI_MIN, KI_MAX);
 }
-void CyberGearDriver::set_speed_ref(float speed){
+void CyberGearDriver::set_speed(float speed){
     _send_can_float_package(_cybergear_can_id, ADDR_SPEED_REF, speed, V_MIN, V_MAX);
 }
 
@@ -169,13 +129,13 @@ void CyberGearDriver::request_status() {
     uint8_t data[8] = {0x00};
     _send_can_package(_cybergear_can_id, CMD_GET_STATUS, _master_can_id, 8, data);
 }
-void CyberGearDriver::process_message(twai_message_t& message){
-    uint16_t raw_position = message.data[1] | message.data[0] << 8;
-    uint16_t raw_speed = message.data[3] | message.data[2] << 8;
-    uint16_t raw_torque = message.data[5] | message.data[4] << 8;
-    uint16_t raw_temperature = message.data[7] | message.data[6] << 8;
+void CyberGearDriver::process_message(CAN_message_t& message){
+    uint16_t raw_position = message.buf[1] | message.buf[0] << 8;
+    uint16_t raw_speed = message.buf[3] | message.buf[2] << 8;
+    uint16_t raw_torque = message.buf[5] | message.buf[4] << 8;
+    uint16_t raw_temperature = message.buf[7] | message.buf[6] << 8;
 
-    _status.position = _uint_to_float(raw_position, POS_MIN, POS_MAX);
+    _status.position = _uint_to_float(raw_position, P_MIN, P_MAX);
     _status.speed = _uint_to_float(raw_speed, V_MIN, V_MAX);
     _status.torque = _uint_to_float(raw_torque, T_MIN, T_MAX);
     _status.temperature = raw_temperature;
@@ -208,7 +168,7 @@ void CyberGearDriver::_send_can_package(uint8_t can_id, uint8_t cmd_id, uint16_t
     message.id = id;
     message.len = len;
     for (int i = 0; i < len; i++) {
-        message.data[i] = data[i];
+        message.buf[i] = data[i];
     }
 
     // Queue message for transmission

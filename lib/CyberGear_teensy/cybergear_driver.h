@@ -1,5 +1,5 @@
-#include "driver/twai.h"
-#include "_cybergear_defs.h"
+// #include "driver/twai.h"
+#include "cybergear_defs.h"
 
 struct CyberGearStatus {
     float position;
@@ -59,8 +59,9 @@ class CyberGearDriver {
         void set_motor_can_id(uint8_t can_id);
 
         void request_status();
-        void process_message(twai_message_t& message);
+        void process_message(CAN_message_t& message);
         CyberGearStatus get_status() const;
+        FlexCAN_T4<CAN1, RX_SIZE_256, TX_SIZE_16> can1;
         
     private:
         uint16_t _float_to_uint(float x, float x_min, float x_max, int bits);
@@ -73,4 +74,5 @@ class CyberGearDriver {
         uint8_t _run_mode;
         bool _use_serial_debug;
         CyberGearStatus _status;
+        
 };

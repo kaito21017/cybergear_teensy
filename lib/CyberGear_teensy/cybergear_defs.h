@@ -1,17 +1,21 @@
-#ifndef CYBER_GEAR_DRIVER_DEFS_H
-#define CYBER_GEAR_DRIVER_DEFS_H
+#ifndef CYBER_GEAR_DEFS_H
+#define CYBER_GEAR_DEFS_H
 
 #define CMD_POSITION 1
 #define CMD_RESPONSE 2
 #define CMD_ENABLE 3
-#define CMD_RESET 4
+#define CMD_STOP 4
 #define CMD_SET_MECH_POSITION_TO_ZERO 6
-#define CMD_CHANGE_CAN_ID 7
+#define CMD_SET_CAN_ID 7
 #define CMD_GET_STATUS 15
 #define CMD_RAM_READ 17
 #define CMD_RAM_WRITE 18
 #define CMD_GET_MOTOR_FAIL 21
 
+
+#define ADDR_SPEED_KP              0x2014
+#define ADDR_SPEED_KI              0x2015
+#define ADDR_POSITION_KP           0x2016
 #define ADDR_RUN_MODE 0x7005
 #define ADDR_IQ_REF 0x7006
 #define ADDR_SPEED_REF 0x700A
@@ -19,7 +23,7 @@
 #define ADDR_CURRENT_KP 0x7010
 #define ADDR_CURRENT_KI 0x7011
 #define ADDR_CURRENT_FILTER_GAIN 0x7014
-#define ADDR_LOC_REF 0x7016
+#define ADDR_POSITION_REF          0x7016
 #define ADDR_LIMIT_SPEED 0x7017
 #define ADDR_LIMIT_CURRENT 0x7018
 #define ADDR_MECH_POS 0x7019
@@ -27,9 +31,9 @@
 #define ADDR_MECH_VEL 0x701B
 #define ADDR_VBUS 0x701C
 #define ADDR_ROTATION 0x701D
-#define ADDR_LOC_KP 0x701E
-#define ADDR_SPD_KP 0x701F
-#define ADDR_SPD_KI 0x7020
+#define ADDR_POSITION_KP 0x701E
+#define ADDR_SPEED_KP 0x701F
+#define ADDR_SPEED_KI 0x7020
 
 #define MODE_MOTION 0x00
 #define MODE_POSITION 0x01
@@ -42,6 +46,8 @@
 #define V_MAX 30.0f
 #define KP_MIN 0.0f
 #define KP_MAX 500.0f
+#define KI_MIN                      0.0f
+#define KI_MAX                     10.0f
 #define KD_MIN 0.0f
 #define KD_MAX 5.0f
 #define T_MIN -12.0f
