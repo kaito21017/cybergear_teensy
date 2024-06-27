@@ -8,14 +8,30 @@ uint8_t MASTER_CAN_ID = 0x00;
 CyberGearDriver cybergear = CyberGearDriver(CYBERGEAR_CAN_ID, MASTER_CAN_ID);
 
 CyberGearStatus motor_status;
+#include <cybergear_driver.h>
+
+// FlexCAN_T4<CAN3, RX_SIZE_256, TX_SIZE_16> can3;
+uint8_t CYBERGEAR_CAN_ID = 0x7E;
+uint8_t MASTER_CAN_ID = 0x00;
+CyberGearDriver cybergear = CyberGearDriver(CYBERGEAR_CAN_ID, MASTER_CAN_ID);
+
+CyberGearStatus motor_status;
 
 // put function declarations here:
 
 CAN_message_t msg;
+CAN_message_t msg;
 void setup() {
+  Serial.begin(115200); delay(400);
   Serial.begin(115200); delay(400);
   // put your setup code here, to run once:
   // int result = myFunction(2, 3);
+  // can3.begin();
+  // can3.setBaudRate(1000000);
+  cybergear.init_can();
+  cybergear.init_motor(MODE_POSITION);
+  cybergear.set_limit_speed(10.0f); /* set the maximum speed of the motor */
+  cybergear.set_limit_current(5.0); /* current limit allows faster operation */
   // can3.begin();
   // can3.setBaudRate(1000000);
   cybergear.init_can();
@@ -85,4 +101,5 @@ void loop() {
   // put your main code here, to run repeatedly:
   delayMicroseconds(20);
 }
+
 
