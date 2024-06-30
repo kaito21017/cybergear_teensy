@@ -52,6 +52,8 @@ class CyberGearDriver {
         // MODE_POSITION
         void set_position_kp(float kp);
         void set_position(float position);
+        void request_mech_pos();
+        void get_mech_pos();
 
         // MODE_SPEED
         void set_speed_kp(float kp);
@@ -64,6 +66,8 @@ class CyberGearDriver {
 
         void request_status();
         void process_message(CAN_message_t& message);
+        void request_VBUS();
+        void get_VBUS();
         CyberGearStatus get_status();
         FlexCAN_T4<CAN1, RX_SIZE_256, TX_SIZE_16> can1;
         
