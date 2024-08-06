@@ -24,7 +24,7 @@ void setup() {
   cybergear1.init_motor(MODE_POSITION);
   delay(1);
   // cybergear1.init_motor(MODE_CURRENT);
-  cybergear1.set_limit_speed(10.0f); /* set the maximum speed of the motor */
+  cybergear1.set_limit_speed(1.0f); /* set the maximum speed of the motor */
   delay(1);
   cybergear1.set_limit_current(1.0); /* current limit allows faster operation */
   delay(1);

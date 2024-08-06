@@ -6,11 +6,48 @@
 #include <FlexCAN_T4.h>
 
 struct CyberGearStatus {
+    uint8_t motor_can_id;
     float position;
+    float pos_offset;
     float speed;
     float torque;
     uint16_t temperature;
 };
+
+struct MotorFault
+{
+  bool encoder_not_calibrated;
+  bool over_current_phase_a;
+  bool over_current_phase_b;
+  bool over_voltage;
+  bool under_voltage;
+  bool driver_chip;
+  bool motor_over_tempareture;
+};
+
+struct MotorParameter
+{
+  unsigned long stamp_usec;
+  uint16_t run_mode;
+  float iq_ref;
+  float spd_ref;
+  float limit_torque;
+  float cur_kp;
+  float cur_ki;
+  float cur_filt_gain;
+  float loc_ref;
+  float limit_spd;
+  float limit_cur;
+  float mech_pos;
+  float iqf;
+  float mech_vel;
+  float vbus;
+  int16_t rotation;
+  float loc_kp;
+  float spd_kp;
+  float spd_ki;
+};
+
 
 struct CyberGearMotionCommand {
     float position;
@@ -69,7 +106,7 @@ class CyberGearDriver {
         void request_VBUS();
         void get_VBUS();
         CyberGearStatus get_status();
-        FlexCAN_T4<CAN1, RX_SIZE_256, TX_SIZE_16> can1;
+        // FlexCAN_T4<CAN1, RX_SIZE_256, TX_SIZE_16> can1;
         
     private:
         uint16_t _float_to_uint(float x, float x_min, float x_max, int bits);
@@ -82,6 +119,7 @@ class CyberGearDriver {
         uint8_t _run_mode;
         bool _use_serial_debug;
         CyberGearStatus _status;
+        FlexCAN_T4<CAN1, RX_SIZE_256, TX_SIZE_16> can1;
         
 };
 
